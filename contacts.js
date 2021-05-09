@@ -1,46 +1,67 @@
-// не работает import
-
-// Сделай импорт модулей fs и path для работы с файловой системой
-// import path from 'path'
-// import fs from 'fs'
 const path=require('path')
-const fs = require('fs')
+const fs = require('fs/promises')
+const shortid = require('shortid')
 
-console.log('hi contacts');
+const contactsPath = path.join('db','contacts.json')
 
-// Создай переменную contactsPath и запиши в нее путь к файле contacts.json. Для составления пути ипользуй методы модуля path.
-const contactsPath = ''
-
-// TODO: задокументировать каждую функцию
-function listContacts() {
-  // ...твой код
+// список контактов
+async function listContacts() {
+  try {
+    const data = await fs.readFile(contactsPath)
+    console.table(JSON.parse(data));
+  } catch (error) {
+  console.log(error.message);
+  }
 }
 
-function getContactById(contactId) {
-  // ...твой код
+// найти контакт по id
+async function getContactById(contactId) {
+  try {
+    const data = await fs.readFile(contactsPath)
+    const contacts = JSON.parse(data)
+    const contact = contacts.find(({ id }) => id === contactId)
+    console.log(contact);
+  } catch (error) {
+    console.log(error.message);
+    }
 }
 
-function removeContact(contactId) {
-  // ...твой код
+// удалить контакт по id
+async function removeContact(contactId) {
+try {
+     const data = await fs.readFile(contactsPath)
+    const contacts = JSON.parse(data)
+    const updatedContacts = JSON.stringify(contacts.filter(({ id }) => id !== contactId), null, 2)
+    await fs.writeFile(contactsPath, updatedContacts)
+    console.table(JSON.parse(updatedContacts));
+  } catch (error) {
+    console.log(error.message);
+  }
 }
 
-function addContact(name, email, phone) {
-  // ...твой код
+// добавить контакт
+async function addContact(name, email, phone) {
+  try {
+    const data = await fs.readFile(contactsPath)
+    const contacts = JSON.parse(data)
+    if (!name || !email || !phone) {
+      console.log('Please enter data')
+      return
+    }
+    const newContact = { id: shortid.generate(), name, email, phone }
+    const updatedContacts=JSON.stringify([...contacts, newContact], null, 2)
+   await fs.writeFile(contactsPath, updatedContacts)
+console.table(JSON.parse(updatedContacts));
+  } catch (error) {
+    console.log(error.message);
+  }
 }
 
-
-// examples
-
-// fs.mkdir(path.join(__dirname, 'test-02'), (err) => {
-//     if (err) {
-//         throw err
-//     }
-
-//     console.log('folder created');
-// })
-
-
-
-// console.log(path.extname('index.html'));
+module.exports = {
+    listContacts,
+    getContactById,
+    removeContact,
+    addContact,
+}
 
 
